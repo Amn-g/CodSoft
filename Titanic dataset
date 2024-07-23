@@ -1,0 +1,43 @@
+# Import necessary libraries
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report
+
+# Load the dataset
+url = 'https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv'
+df = pd.read_csv(url)
+
+# Inspect the data
+print(df.head())
+
+# Data Preprocessing
+# Handle missing values by filling with the median for 'Age' and most frequent for 'Embarked'
+df['Age'].fillna(df['Age'].median(), inplace=True)
+df['Embarked'].fillna(df['Embarked'].mode()[0], inplace=True)
+
+# Drop 'Cabin' due to a high number of missing values
+df.drop('Cabin', axis=1, inplace=True)
+
+# Encode categorical variables
+label_enc = LabelEncoder()
+df['Sex'] = label_enc.fit_transform(df['Sex'])
+df['Embarked'] = label_enc.fit_transform(df['Embarked'])
+
+# Select features and target variable
+X = df[['Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Fare', 'Embarked']]
+y = df['Survived']
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Model Building
+# Using RandomForestClassifier
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X_train, y_train)
+
+# Model Evaluation
+y_pred = model.predict(X_test)
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("Classification Report:\n", classification_report(y_test, y_pred))
