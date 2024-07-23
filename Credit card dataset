@@ -1,0 +1,73 @@
+# Import necessary libraries
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report
+from imblearn.over_sampling import SMOTE
+
+# Load the dataset (replace 'creditcard.csv' with the actual file path)
+url = 'https://example.com/creditcard.csv'  # Replace with actual URL or file path
+df = pd.read_csv(url)
+
+# Inspect the data
+print(df.head())
+
+# Separate features and target variable
+X = df.drop(columns=['Class'])
+y = df['Class']
+
+# Normalize the features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Handle class imbalance using SMOTE
+smote = SMOTE(random_state=42)
+X_resampled, y_resampled = smote.fit_resample(X_scaled, y)
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X_resampled, y_resampled, test_size=0.2, random_state=42)
+
+# Train the RandomForestClassifier model
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X_train, y_train)
+
+# Evaluate the model
+y_pred = model.predict(X_test)
+print(classification_report(y_test, y_pred))
+
+# Example: Predicting fraud for a new transaction (example)
+new_transaction = pd.DataFrame({
+    'V1': [-1.359807],
+    'V2': [1.191857],
+    'V3': [-0.115665],
+    'V4': [0.230434],
+    'V5': [0.268091],
+    'V6': [0.166480],
+    'V7': [0.448154],
+    'V8': [0.060018],
+    'V9': [-0.082360],
+    'V10': [0.085101],
+    'V11': [-0.255425],
+    'V12': [-0.166974],
+    'V13': [0.042422],
+    'V14': [0.078559],
+    'V15': [0.417277],
+    'V16': [0.422268],
+    'V17': [0.996710],
+    'V18': [0.058415],
+    'V19': [0.278950],
+    'V20': [0.137680],
+    'V21': [0.005404],
+    'V22': [-0.025340],
+    'V23': [0.017389],
+    'V24': [0.006208],
+    'V25': [0.078711],
+    'V26': [0.008321],
+    'V27': [0.029236],
+    'V28': [0.007129],
+    'Amount': [149.62]
+})
+new_transaction_scaled = scaler.transform(new_transaction)
+new_prediction = model.predict(new_transaction_scaled)
+print("Predicted Class for New Transaction:", new_prediction)
